@@ -28,7 +28,7 @@ public class InvestmentProjectionService {
     public InvestmentProjectionResponse projectFutureValue(String ticker, BigDecimal principal, int years) {
         double riskFreeRate = riskFreeRateService.getRiskFreeRate();
         double beta = newtonAnalyticsClient.getBeta(ticker);
-        double expectedReturnRate = historicalReturnsClient.getExpectedAnnualReturnFromLastYear(ticker);
+        double expectedReturnRate = historicalReturnsClient.getExpectedAnnualSp500ReturnFromFiveYears(ticker);
 
         double capmRate = riskFreeRate + beta * (expectedReturnRate - riskFreeRate);
 

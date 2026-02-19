@@ -5,7 +5,7 @@ Spring Boot REST API that predicts the **future value of a mutual fund investmen
 - CAPM (Capital Asset Pricing Model)
 - A hardcoded risk-free rate
 - Mutual fund beta from Newton Analytics
-- Historical average return (last 12 monthly observations) from Newton Analytics
+- S&P 500 historical average return over the past 5 years from Newton Analytics
 
 ---
 
@@ -41,7 +41,7 @@ The API computes rate and future value as:
 - `years` = investment horizon in years
 - `riskFreeRate` = hardcoded US Treasury proxy (`0.0425`)
 - `beta` = mutual fund beta relative to S&P 500
-- `expectedReturnRate` = annualized return based on monthly average return from last 12 observations
+- `expectedReturnRate` = annualized S&P 500 return based on 5 years of monthly observations
 
 ---
 
@@ -56,14 +56,14 @@ Used to fetch `beta` for the selected mutual fund:
 
 ### 2) Newton Modern Portfolio API
 
-Used to fetch `averageReturns` (monthly average returns) and extract the selected fund return:
+Used to fetch `averageReturns` (monthly average returns) and extract the S&P 500 return:
 
 - Docs:
 	`https://www.newtonanalytics.com/docs/api/modernportfolio.php`
 - Request format used in this app:
-	`https://api.newtonanalytics.com/modern-portfolio/?tickers={MUTUAL_FUND},^GSPC&interval=1mo&observations=12`
+	`https://api.newtonanalytics.com/modern-portfolio/?tickers=^GSPC,{MUTUAL_FUND}&interval=1mo&observations=60`
 
-The app takes the **first item** in `averageReturns` (corresponding to `{MUTUAL_FUND}`), then annualizes it via:
+The app takes the **first item** in `averageReturns` (corresponding to `^GSPC`), then annualizes it via:
 
 - `annualizedReturn = (1 + monthlyAverageReturn)^12 - 1`
 
@@ -189,7 +189,7 @@ When adding a new fund, ensure:
 ## Assumptions and notes
 
 - Risk-free rate is hardcoded by requirement (not dynamically fetched from FRED yet).
-- Expected return uses last 12 monthly observations from Newton Modern Portfolio API.
+- Expected return uses S&P 500 average return from 60 monthly observations (5 years) from Newton Modern Portfolio API.
 - This is an educational projection tool, not financial advice.
 
 ---

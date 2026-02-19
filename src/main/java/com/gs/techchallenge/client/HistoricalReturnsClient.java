@@ -22,11 +22,11 @@ public class HistoricalReturnsClient {
         this.objectMapper = objectMapper;
     }
 
-    public double getExpectedAnnualReturnFromLastYear(String ticker) {
+    public double getExpectedAnnualSp500ReturnFromFiveYears(String ticker) {
         URI uri = UriComponentsBuilder.fromHttpUrl(MODERN_PORTFOLIO_URL)
-                .queryParam("tickers", ticker + ",^GSPC")
+                .queryParam("tickers", "^GSPC," + ticker)
                 .queryParam("interval", "1mo")
-                .queryParam("observations", "12")
+                .queryParam("observations", "60")
                 .encode()
                 .build()
                 .toUri();
@@ -36,14 +36,14 @@ public class HistoricalReturnsClient {
                     .uri(uri)
                     .retrieve()
                     .body(String.class);
-            double averageMonthlyReturn = parseAverageMonthlyReturn(responseBody);
+            double averageMonthlyReturn = parseAverageMonthlySp500Return(responseBody);
             return Math.pow(1 + averageMonthlyReturn, 12) - 1;
         } catch (Exception ex) {
-            throw new ExternalApiException("Unable to fetch historical returns for " + ticker, ex);
+            throw new ExternalApiException("Unable to fetch 5-year S&P historical return", ex);
         }
     }
 
-    private double parseAverageMonthlyReturn(String responseBody) {
+    private double parseAverageMonthlySp500Return(String responseBody) {
         if (responseBody == null || responseBody.isBlank()) {
             throw new ExternalApiException("Newton Modern Portfolio API returned an empty response");
         }
@@ -61,12 +61,12 @@ public class HistoricalReturnsClient {
                 throw new ExternalApiException("Modern Portfolio response missing averageReturns");
             }
 
-            JsonNode selectedFundReturn = avgReturnsNode.get(0);
-            if (selectedFundReturn == null || selectedFundReturn.isNull()) {
-                throw new ExternalApiException("Modern Portfolio average return for selected ticker is missing");
+            JsonNode sp500Return = avgReturnsNode.get(0);
+            if (sp500Return == null || sp500Return.isNull()) {
+                throw new ExternalApiException("Modern Portfolio average return for S&P 500 is missing");
             }
 
-            return selectedFundReturn.asDouble();
+            return sp500Return.asDouble();
         } catch (ExternalApiException ex) {
             throw ex;
         } catch (Exception ex) {
