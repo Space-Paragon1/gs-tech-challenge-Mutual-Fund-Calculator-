@@ -66,7 +66,7 @@ FV = Principal × (1 + r)^t
 ### Prerequisites
 
 **Backend:**
-- Java 17+
+- Java 17+ (Java 25 works — see [Windows Setup](#windows-setup) below)
 - Maven 3.8+
 
 **Frontend:**
@@ -118,6 +118,30 @@ chmod +x setup.sh start.sh test.sh
 # Start both applications
 ./start.sh
 ```
+
+#### Windows Setup
+
+If `java` and `mvn` are not on your PATH, run the following **once** in PowerShell to set them permanently (no admin required):
+
+```powershell
+# 1. Download Maven (no installer needed)
+Invoke-WebRequest -Uri "https://dlcdn.apache.org/maven/maven-3/3.9.12/binaries/apache-maven-3.9.12-bin.zip" -OutFile "$env:TEMP\maven.zip"
+Expand-Archive "$env:TEMP\maven.zip" -DestinationPath "$env:USERPROFILE\maven" -Force
+
+# 2. Set JAVA_HOME and add Java + Maven to your user PATH permanently
+[System.Environment]::SetEnvironmentVariable("JAVA_HOME", "C:\Users\DELL\Downloads\oracleJdk-25", "User")
+$currentPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+[System.Environment]::SetEnvironmentVariable("Path", "$currentPath;C:\Users\DELL\Downloads\oracleJdk-25\bin;C:\Users\DELL\maven\apache-maven-3.9.12\bin", "User")
+```
+
+Restart your terminal after running the above. Verify with:
+
+```powershell
+java -version
+mvn -version
+```
+
+> **Note:** The project is configured to support Java 25 via `net.bytebuddy.experimental=true` in `pom.xml`. No extra flags are needed when running `mvn test`.
 
 ---
 
@@ -249,12 +273,29 @@ To add more funds, edit `MutualFundCatalogService.java`
 # Run all tests
 mvn test
 
-# Run specific test class
+# Run a specific test class
+mvn test -Dtest=GlobalExceptionHandlerTest
+mvn test -Dtest=NewtonAnalyticsClientTest
+mvn test -Dtest=HistoricalReturnsClientTest
 mvn test -Dtest=MutualFundControllerTest
+mvn test -Dtest=InvestmentProjectionServiceTest
 
-# Run with coverage report
-mvn test jacoco:report
+# Run all tests in a package
+mvn test -Dtest="com.gs.techchallenge.service.*"
 ```
+
+### Test Coverage
+
+| Test Class | What it covers |
+|---|---|
+| `MutualFundControllerTest` | REST endpoints, ticker normalisation, unsupported fund rejection |
+| `InvestmentProjectionServiceTest` | CAPM formula and future value calculation |
+| `InvestmentProjectionServiceExtendedTest` | Edge cases: time horizons, high beta, large amounts, precision |
+| `MutualFundCatalogServiceTest` | Fund catalog, supported tickers, case-insensitive lookup |
+| `RiskFreeRateServiceTest` | Risk-free rate value and consistency |
+| `GlobalExceptionHandlerTest` | HTTP error responses for all exception types (400, 502, 500) |
+| `NewtonAnalyticsClientTest` | Beta JSON parsing for all response shapes, error handling |
+| `HistoricalReturnsClientTest` | Historical return parsing, annualisation formula, error handling |
 
 ### Frontend Tests
 
