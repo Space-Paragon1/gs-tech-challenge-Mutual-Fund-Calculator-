@@ -1,0 +1,17 @@
+vs-code-settings:
+  extensions:
+    - ms-vscode.extension-pack-for-java
+    - Angular.ng-template
+    - esbenp.prettier-vscode
+    - dbaeumer.vscode-eslint
+    - ms-vscode-remote.remote-containers
+
+Debug Configurations:
+  - Java Backend: Debug on port 5005
+  - Angular Frontend: Debug DevTools in Chrome
+
+Recommended VS Code Settings:
+  - Format on Save: enabled
+  - Prettier as formatter
+  - ESLint for JavaScript/TypeScript
+  - Maven for Java

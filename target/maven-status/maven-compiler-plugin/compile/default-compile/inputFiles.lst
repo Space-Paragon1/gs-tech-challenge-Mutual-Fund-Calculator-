@@ -1,6 +1,7 @@
 /workspaces/gs-tech-challenge/src/main/java/com/gs/techchallenge/TechChallengeApplication.java
 /workspaces/gs-tech-challenge/src/main/java/com/gs/techchallenge/client/HistoricalReturnsClient.java
 /workspaces/gs-tech-challenge/src/main/java/com/gs/techchallenge/client/NewtonAnalyticsClient.java
+/workspaces/gs-tech-challenge/src/main/java/com/gs/techchallenge/config/CorsConfig.java
 /workspaces/gs-tech-challenge/src/main/java/com/gs/techchallenge/controller/MutualFundController.java
 /workspaces/gs-tech-challenge/src/main/java/com/gs/techchallenge/exception/ExternalApiException.java
 /workspaces/gs-tech-challenge/src/main/java/com/gs/techchallenge/exception/GlobalExceptionHandler.java

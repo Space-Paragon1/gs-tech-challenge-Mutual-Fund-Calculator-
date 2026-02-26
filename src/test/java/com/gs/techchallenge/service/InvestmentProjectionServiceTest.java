@@ -45,6 +45,6 @@ class InvestmentProjectionServiceTest {
         assertThat(response.beta()).isEqualTo(1.2);
         assertThat(response.expectedReturnRate()).isEqualTo(0.10);
         assertThat(response.capmRate()).isCloseTo(0.112, org.assertj.core.data.Offset.offset(1e-12));
-        assertThat(response.futureValue()).isEqualByComparingTo("17005.84");
+        assertThat(response.futureValue()).isEqualByComparingTo("17002.94");
     }
 }

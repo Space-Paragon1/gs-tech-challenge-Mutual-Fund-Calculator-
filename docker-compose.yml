@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Mutual Fund Calculator Backend
+  backend:
+    image: maven:3.8.1-jdk-17-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+      - ~/.m2:/root/.m2
+    ports:
+      - "8080:8080"
+    command: mvn spring-boot:run
+    environment:
+      MAVEN_OPTS: "-Xmx256m -Xms128m"
+    networks:
+      - mutual-fund-net
+
+  # Mutual Fund Calculator Frontend
+  frontend:
+    image: node:18-alpine
+    working_dir: /app/frontend
+    volumes:
+      - .:/app
+    ports:
+      - "4200:4200"
+    command: sh -c "npm install && npm start"
+    depends_on:
+      - backend
+    environment:
+      - ANGULAR_APP_API_URL=http://backend:8080
+    networks:
+      - mutual-fund-net
+
+networks:
+  mutual-fund-net:
+    driver: bridge
+
+volumes:
+  maven_cache:

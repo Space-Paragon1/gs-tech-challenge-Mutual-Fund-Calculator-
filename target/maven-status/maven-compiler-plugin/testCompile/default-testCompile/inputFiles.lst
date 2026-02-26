@@ -1,0 +1,5 @@
+/workspaces/gs-tech-challenge/src/test/java/com/gs/techchallenge/controller/MutualFundControllerTest.java
+/workspaces/gs-tech-challenge/src/test/java/com/gs/techchallenge/service/InvestmentProjectionServiceExtendedTest.java
+/workspaces/gs-tech-challenge/src/test/java/com/gs/techchallenge/service/InvestmentProjectionServiceTest.java
+/workspaces/gs-tech-challenge/src/test/java/com/gs/techchallenge/service/MutualFundCatalogServiceTest.java
+/workspaces/gs-tech-challenge/src/test/java/com/gs/techchallenge/service/RiskFreeRateServiceTest.java
