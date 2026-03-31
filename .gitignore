@@ -28,3 +28,6 @@ logs/
 
 # Angular cache
 frontend/.angular/
+
+# Claude Code
+.claude/
