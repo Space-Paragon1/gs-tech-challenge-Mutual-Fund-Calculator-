@@ -1,0 +1,30 @@
+# Maven build output
+target/
+
+# Frontend dependencies
+frontend/node_modules/
+frontend/dist/
+
+# Environment files (secrets)
+.env
+.env.local
+frontend/.env
+frontend/.env.local
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Angular cache
+frontend/.angular/
