@@ -30,8 +30,8 @@ Where:
 ## 📋 Prerequisites
 
 ### Backend
-- Java 17+
-- Maven 3.8+
+- Java 25+
+- Maven 3.9+
 - Spring Boot 3.3.8
 
 ### Frontend

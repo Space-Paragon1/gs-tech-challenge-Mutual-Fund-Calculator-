@@ -31,3 +31,6 @@ frontend/.angular/
 
 # Claude Code
 .claude/
+
+# GitHub Copilot app modernization tool output
+.github/modernize/

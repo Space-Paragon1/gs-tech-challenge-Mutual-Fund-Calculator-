@@ -10,7 +10,7 @@ This document outlines all components implemented for the Mutual Fund Investment
 
 ### ✅ Core Application Structure
 - [x] Spring Boot 3.3.8 application
-- [x] Java 17+ compatible
+- [x] Java 25 compatible
 - [x] Maven build configuration
 - [x] Application properties configuration
 - [x] CORS configuration

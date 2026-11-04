@@ -17,7 +17,7 @@ This application enables users to:
 ### Tech Stack
 
 **Backend:**
-- Java 17
+- Java 25 LTS
 - Spring Boot 3.3.8
 - Maven
 - REST API Architecture
@@ -66,8 +66,8 @@ FV = Principal × (1 + r)^t
 ### Prerequisites
 
 **Backend:**
-- Java 17+ (Java 25 works — see [Windows Setup](#windows-setup) below)
-- Maven 3.8+
+- Java 25 LTS (see [Windows Setup](#windows-setup) below)
+- Maven 3.9+
 
 **Frontend:**
 - Node.js 18+

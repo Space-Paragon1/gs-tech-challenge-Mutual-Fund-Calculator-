@@ -4,16 +4,16 @@
 echo "🚀 Mutual Fund Calculator Setup"
 echo "================================"
 
-# Set JAVA_HOME to Java 21 if available in codespace
-if [ -d "/home/codespace/java/21.0.9-ms" ]; then
-    export JAVA_HOME=/home/codespace/java/21.0.9-ms
+# Set JAVA_HOME to Java 25 if available in codespace
+if [ -d "/home/codespace/java/25.0.5-ms" ]; then
+    export JAVA_HOME=/home/codespace/java/25.0.5-ms
     export PATH="$JAVA_HOME/bin:$PATH"
-    echo "✅ Using Java 21 from codespace"
+    echo "✅ Using Java 25 from codespace"
 fi
 
 # Check if Java is installed
 if ! command -v java &> /dev/null; then
-    echo "❌ Java is not installed. Please install Java 17 or higher."
+    echo "❌ Java is not installed. Please install Java 25 or higher."
     exit 1
 fi
 
@@ -21,7 +21,7 @@ echo "✅ Java detected: $(java -version 2>&1 | head -n 1)"
 
 # Check if Maven is installed
 if ! command -v mvn &> /dev/null; then
-    echo "❌ Maven is not installed. Please install Maven 3.8 or higher."
+    echo "❌ Maven is not installed. Please install Maven 3.9 or higher."
     exit 1
 fi
 

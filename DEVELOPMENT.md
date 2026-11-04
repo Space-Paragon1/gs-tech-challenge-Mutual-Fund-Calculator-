@@ -3,7 +3,7 @@
 ## Code Standards
 
 ### Java/Spring Boot Backend
-- Use Java 17+ features
+- Use Java 25 features
 - Follow Spring Boot conventions
 - Use dependency injection via constructor
 - Implement proper exception handling
