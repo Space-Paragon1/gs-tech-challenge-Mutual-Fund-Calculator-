@@ -9,7 +9,7 @@ This document outlines all components implemented for the Mutual Fund Investment
 ## Backend Implementation
 
 ### ✅ Core Application Structure
-- [x] Spring Boot 3.3.8 application
+- [x] Spring Boot 3.5.16 application
 - [x] Java 25 compatible
 - [x] Maven build configuration
 - [x] Application properties configuration

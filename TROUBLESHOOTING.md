@@ -27,10 +27,10 @@ kill -9 <PID>
 mvn clean install
 
 # Check Java version
-java -version  # Should be 17+
+java -version  # Should be 25
 
 # Check Maven version
-mvn -version   # Should be 3.8+
+mvn -version   # Should be 3.9+
 ```
 
 #### External API Connection Issues
@@ -97,8 +97,8 @@ ng test --browsers=Chrome
 
 1. **Verify Prerequisites**
    ```bash
-   java -version      # Should be 17+
-   mvn -version       # Should be 3.8+
+   java -version      # Should be 25
+   mvn -version       # Should be 3.9+
    node --version     # Should be 18+
    npm --version      # Should be 9+
    ```

@@ -32,7 +32,7 @@ Where:
 ### Backend
 - Java 25+
 - Maven 3.9+
-- Spring Boot 3.3.8
+- Spring Boot 3.5.16
 
 ### Frontend
 - Node.js 18+

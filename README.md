@@ -18,8 +18,8 @@ This application enables users to:
 
 **Backend:**
 - Java 25 LTS
-- Spring Boot 3.3.8
-- Maven
+- Spring Boot 3.5.16
+- Maven 3.9+
 - REST API Architecture
 
 **Frontend:**
@@ -69,6 +69,8 @@ FV = Principal × (1 + r)^t
 - Java 25 LTS (see [Windows Setup](#windows-setup) below)
 - Maven 3.9+
 
+> **Java 25 is required.** The backend compiles for Java 25, so older JDKs (17, 21) fail with `release version 25 not supported`. Check with `java -version`. If you can't install Java 25, use [Docker](#using-docker) instead.
+
 **Frontend:**
 - Node.js 18+
 - npm 9+
@@ -117,6 +119,22 @@ chmod +x setup.sh start.sh test.sh
 
 # Start both applications
 ./start.sh
+```
+
+#### Using Docker
+
+Docker runs the app without Java or Node installed locally. The backend images use Java 25 (Eclipse Temurin).
+
+```bash
+# Start backend (http://localhost:8080) and frontend (http://localhost:4200)
+docker compose up
+```
+
+To build and run only the backend as a standalone image:
+
+```bash
+docker build -f Dockerfile.backend -t mutual-fund-backend .
+docker run -p 8080:8080 mutual-fund-backend
 ```
 
 #### Windows Setup
@@ -450,5 +468,5 @@ This project is part of the GS Tech Challenge curriculum.
 
 ---
 
-**Last Updated**: February 26, 2026
+**Last Updated**: November 4, 2026
 **Version**: 1.0.0
