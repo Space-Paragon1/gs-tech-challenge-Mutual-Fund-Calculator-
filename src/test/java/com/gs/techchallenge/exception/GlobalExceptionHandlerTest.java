@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
@@ -38,6 +39,18 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).containsEntry("status", 400);
         assertThat(response.getBody()).containsEntry("error", "Invalid request parameters");
+        assertThat(response.getBody()).containsKey("timestamp");
+    }
+
+    @Test
+    void handleMissingParameterReturnsBadRequestWithParameterName() {
+        MissingServletRequestParameterException ex = new MissingServletRequestParameterException("principal", "BigDecimal");
+
+        ResponseEntity<Map<String, Object>> response = handler.handleMissingParameter(ex);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).containsEntry("status", 400);
+        assertThat(response.getBody()).containsEntry("error", "Missing required parameter: principal");
         assertThat(response.getBody()).containsKey("timestamp");
     }
 

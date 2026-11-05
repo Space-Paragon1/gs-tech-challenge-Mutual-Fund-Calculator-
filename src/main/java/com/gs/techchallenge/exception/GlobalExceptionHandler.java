@@ -3,10 +3,12 @@ package com.gs.techchallenge.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
@@ -24,6 +26,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({MethodArgumentTypeMismatchException.class, MethodArgumentNotValidException.class, ConstraintViolationException.class})
     public ResponseEntity<Map<String, Object>> handleValidationErrors(Exception ex) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST.value(), "Invalid request parameters");
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingParameter(MissingServletRequestParameterException ex) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST.value(), "Missing required parameter: " + ex.getParameterName());
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFound(NoResourceFoundException ex) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND.value(), "Not found");
     }
 
     @ExceptionHandler(ExternalApiException.class)

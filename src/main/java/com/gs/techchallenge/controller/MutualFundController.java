@@ -4,6 +4,7 @@ import com.gs.techchallenge.model.InvestmentProjectionResponse;
 import com.gs.techchallenge.model.MutualFund;
 import com.gs.techchallenge.service.InvestmentProjectionService;
 import com.gs.techchallenge.service.MutualFundCatalogService;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -45,7 +46,7 @@ public class MutualFundController {
     public InvestmentProjectionResponse getFutureValue(
             @RequestParam @NotBlank String ticker,
             @RequestParam @Positive BigDecimal principal,
-            @RequestParam @Min(1) int years
+            @RequestParam @Min(1) @Max(50) int years
     ) {
         String normalizedTicker = ticker.trim().toUpperCase(Locale.ROOT);
         if (!mutualFundCatalogService.isSupported(normalizedTicker)) {
