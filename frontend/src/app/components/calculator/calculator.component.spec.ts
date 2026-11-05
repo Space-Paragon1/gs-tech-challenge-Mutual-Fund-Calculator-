@@ -70,6 +70,9 @@ describe('CalculatorComponent', () => {
     mutualFundService.getMutualFunds.and.returnValue(of(mockFunds));
     fixture.detectChanges();
 
+    // The first fund is selected automatically, so clear every field first
+    component.investmentForm.reset();
+
     const tickerControl = component.investmentForm.get('ticker');
     const principalControl = component.investmentForm.get('principal');
     const yearsControl = component.investmentForm.get('years');
@@ -158,7 +161,7 @@ describe('CalculatorComponent', () => {
     mutualFundService.getMutualFunds.and.returnValue(of(mockFunds));
     mutualFundService.getInvestmentProjection.and.returnValue(of(mockProjection));
 
-    component.ngOnInit();
+    fixture.detectChanges();
     component.investmentForm.patchValue({
       ticker: 'VFIAX',
       principal: 10000,
@@ -176,7 +179,7 @@ describe('CalculatorComponent', () => {
     mutualFundService.getMutualFunds.and.returnValue(of(mockFunds));
     mutualFundService.getInvestmentProjection.and.returnValue(of(mockProjection));
 
-    component.ngOnInit();
+    fixture.detectChanges();
     component.investmentForm.patchValue({
       ticker: 'VFIAX',
       principal: 10000,
@@ -188,6 +191,27 @@ describe('CalculatorComponent', () => {
 
     const expectedGainPercentage = ((mockProjection.futureValue - mockProjection.principal) / mockProjection.principal) * 100;
     expect(component.gainPercentage).toBeCloseTo(expectedGainPercentage, 2);
+  });
+
+  it('should keep results based on the calculated amount when the amount is edited afterwards', () => {
+    mutualFundService.getMutualFunds.and.returnValue(of(mockFunds));
+    mutualFundService.getInvestmentProjection.and.returnValue(of(mockProjection));
+
+    fixture.detectChanges();
+    component.investmentForm.patchValue({
+      ticker: 'VFIAX',
+      principal: 10000,
+      years: 5
+    });
+    component.calculateProjection();
+
+    // Change the amount without clicking calculate again
+    component.investmentForm.patchValue({ principal: 50000 });
+
+    expect(component.principal).toBe(mockProjection.principal);
+    expect(component.totalGain).toBeCloseTo(mockProjection.futureValue - mockProjection.principal, 2);
+    expect(component.gainPercentage).toBeCloseTo(
+      ((mockProjection.futureValue - mockProjection.principal) / mockProjection.principal) * 100, 2);
   });
 
   it('should disable form during loading', () => {

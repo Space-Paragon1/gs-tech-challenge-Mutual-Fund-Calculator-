@@ -120,8 +120,10 @@ export class CalculatorComponent implements OnInit {
     return fund ? fund.name : '';
   }
 
+  // Use the amount from the last calculation, not the live form value,
+  // so results stay correct if the user edits the form afterwards.
   get principal(): number {
-    return this.investmentForm.get('principal')?.value || 0;
+    return this.projection?.principal || 0;
   }
 
   get futureValue(): number {
