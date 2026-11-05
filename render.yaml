@@ -1,0 +1,9 @@
+# Render deployment config: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: gs-mutual-fund-calculator
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/mutual-funds
+    autoDeploy: true

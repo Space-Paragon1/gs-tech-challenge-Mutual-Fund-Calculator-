@@ -130,11 +130,12 @@ Docker runs the app without Java or Node installed locally. The backend images u
 docker compose up
 ```
 
-To build and run only the backend as a standalone image:
+To run the whole app as a single container (the same image used in production):
 
 ```bash
-docker build -f Dockerfile.backend -t mutual-fund-backend .
-docker run -p 8080:8080 mutual-fund-backend
+docker build -t mutual-fund-calculator .
+docker run -p 8080:8080 mutual-fund-calculator
+# Open http://localhost:8080
 ```
 
 #### Windows Setup
@@ -374,21 +375,41 @@ Example error response:
 
 ---
 
+## ☁️ Deployment
+
+The app is deployed on [Render](https://render.com) as a single Docker service:
+
+- The root `Dockerfile` builds the Angular site, bundles it into the Spring Boot jar, and runs it. The website and the API share one URL, so no CORS setup is needed.
+- `render.yaml` holds the Render settings (free plan, health check on `/api/mutual-funds`).
+- Every push to `main` redeploys automatically.
+
+> **Note:** On Render's free plan the app sleeps after 15 minutes without visits. The first visit after that takes about a minute to load. Open the link a minute before a demo.
+
+To deploy your own copy:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Space-Paragon1/gs-tech-challenge-Mutual-Fund-Calculator-)
+
+---
+
 ## 🔧 Configuration
 
 ### Backend (application.properties)
 ```properties
 spring.application.name=gs-tech-challenge
-server.port=8080
+server.port=${PORT:8080}
 ```
+
+The port defaults to 8080. Hosting platforms like Render set the `PORT` environment variable instead.
 
 ### Frontend (environment.ts)
 ```typescript
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8080'
+  apiUrl: ''
 };
 ```
+
+The frontend calls the API at the relative path `/api`. In development, `ng serve` forwards those calls to `http://localhost:8080` (see `frontend/proxy.conf.json`). In production, Spring Boot serves the site and the API from the same address.
 
 ---
 
