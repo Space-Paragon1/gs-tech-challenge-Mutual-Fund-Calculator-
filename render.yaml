@@ -6,4 +6,4 @@ services:
     plan: free
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/mutual-funds
-    autoDeploy: true
+    autoDeployTrigger: commit
