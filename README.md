@@ -12,7 +12,9 @@ This application enables users to:
   - CAPM-calculated expected return rates
   - Projected future value
   - Total gain and gain percentage
+  - Growth charts and a year-by-year breakdown
   - Detailed breakdown of all calculation components
+- See a clear note when the data provider's beta looks unrealistic and a standard value is used instead (see [Beta Safety Check](#beta-safety-check))
 
 ### Tech Stack
 
@@ -27,6 +29,11 @@ This application enables users to:
 - TypeScript
 - Reactive Forms
 - RxJS
+- Chart.js
+
+**Deployment:**
+- Docker (single container for site + API)
+- Render (free plan)
 
 ---
 
@@ -55,9 +62,22 @@ FV = Principal × (1 + r)^t
 ### Components
 
 - **Risk-Free Rate**: Hardcoded at 4.25% (US Treasury 10-Year proxy)
-- **Beta**: Retrieved from Newton Analytics API (mutual fund volatility relative to S&P 500)
+- **Beta**: Retrieved from Newton Analytics API (mutual fund volatility relative to S&P 500), then checked for plausibility (see below)
 - **Expected Return Rate**: Calculated from 5-year S&P 500 historical returns (Newton Analytics API)
 - **CAPM Rate**: The calculated expected return for the investment
+
+### Beta Safety Check
+
+Every fund in the catalog is a diversified US stock fund, so its beta against the S&P 500 should be close to 1. Newton Analytics currently returns betas near zero or negative for these funds (for example, about -0.09 for VFIAX, an S&P 500 index fund). Used as-is, that would project returns below the risk-free rate.
+
+The backend (`InvestmentProjectionService`) checks every beta before using it:
+
+| Provider beta | What happens |
+|---|---|
+| Between 0.5 and 2.0 | Used as-is |
+| Below 0.5, above 2.0, or not a number | Replaced with the market beta of **1.0**, and a warning is logged |
+
+When the beta is replaced, the API response includes `"betaAdjusted": true` and the original value in `providerBeta`. The results page tags the beta as **adjusted** and shows a note with the provider's value, so the substitution is never hidden. The 0.5–2.0 range is deliberately wide: real betas for these funds are typically around 0.8–1.2.
 
 ---
 
@@ -67,7 +87,7 @@ FV = Principal × (1 + r)^t
 
 **Backend:**
 - Java 25 LTS (see [Windows Setup](#windows-setup) below)
-- Maven 3.9+
+- Maven 3.9+ (macOS: `brew install maven`)
 
 > **Java 25 is required.** The backend compiles for Java 25, so older JDKs (17, 21) fail with `release version 25 not supported`. Check with `java -version`. If you can't install Java 25, use [Docker](#using-docker) instead.
 
@@ -194,7 +214,8 @@ gs-tech-challenge/
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── components/
-│   │   │   │   └── calculator/               # Main UI component
+│   │   │   │   ├── calculator/               # Main UI component
+│   │   │   │   └── investment-chart/         # Growth and gains charts (Chart.js)
 │   │   │   ├── services/
 │   │   │   │   └── mutual-fund.service.ts   # API service
 │   │   │   ├── models/
@@ -206,15 +227,22 @@ gs-tech-challenge/
 │   │   │   └── app.routes.ts
 │   │   ├── environments/                     # Environment config
 │   │   └── styles.css                       # Global styles
+│   ├── proxy.conf.json                       # Dev server forwards /api to :8080
 │   ├── package.json
 │   ├── angular.json
 │   └── tsconfig.json
+├── Dockerfile                                # Full app (site + API) for deployment
+├── render.yaml                               # Render deployment settings
+├── docker-compose.yml                        # Local backend + frontend containers
+├── Dockerfile.backend / Dockerfile.frontend  # Separate backend/frontend images
+├── API_DOCUMENTATION.md                      # Full API reference
 ├── README.md                                 # This file
 ├── DEVELOPMENT.md                            # Development guidelines
 ├── TROUBLESHOOTING.md                        # Troubleshooting guide
 ├── setup.sh                                  # Setup script
 ├── start.sh                                  # Start script
-└── test.sh                                   # Test script
+├── test.sh                                   # Runs backend + frontend tests
+└── health-check.sh                           # Checks both servers are up
 ```
 
 ---
@@ -246,27 +274,41 @@ GET /api/mutual-funds
 #### 2. Calculate Investment Projection
 
 ```http
-GET /api/investments/future-value?ticker=VFIAX&principal=10000&years=5
+GET /api/investments/future-value?ticker=VFIAX&principal=10000&years=10
 ```
 
 **Parameters:**
-- `ticker` (required): Mutual fund symbol
-- `principal` (required): Initial investment amount (USD)
-- `years` (required): Investment duration (1-50 years)
+- `ticker` (required): Mutual fund symbol (case-insensitive)
+- `principal` (required): Initial investment amount in USD, greater than 0
+- `years` (required): Investment duration, 1–50 years
 
-**Response:**
+**Response** (a real response, where the provider's beta was replaced):
 ```json
 {
   "ticker": "VFIAX",
   "principal": 10000,
-  "years": 5,
+  "years": 10,
   "riskFreeRate": 0.0425,
-  "beta": 1.05,
-  "expectedReturnRate": 0.10,
-  "capmRate": 0.1176,
-  "futureValue": 15896.50
+  "beta": 1.0,
+  "providerBeta": -0.0958,
+  "betaAdjusted": true,
+  "expectedReturnRate": 0.11997,
+  "capmRate": 0.11997,
+  "futureValue": 31050.19
 }
 ```
+
+| Field | Meaning |
+|---|---|
+| `riskFreeRate` | Risk-free rate used (4.25%) |
+| `beta` | Beta used in the calculation |
+| `providerBeta` | Beta returned by Newton Analytics |
+| `betaAdjusted` | `true` if `providerBeta` was unrealistic and 1.0 was used instead |
+| `expectedReturnRate` | Expected market return (5-year S&P 500 history) |
+| `capmRate` | CAPM expected annual return |
+| `futureValue` | Projected value after `years`, rounded to cents |
+
+See [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) for more examples.
 
 ---
 
@@ -286,7 +328,7 @@ To add more funds, edit `MutualFundCatalogService.java`
 
 ## 🧪 Testing
 
-### Backend Tests
+### Backend Tests (61 tests)
 
 ```bash
 # Run all tests
@@ -308,7 +350,8 @@ mvn test -Dtest="com.gs.techchallenge.service.*"
 | Test Class | What it covers |
 |---|---|
 | `MutualFundControllerTest` | REST endpoints, ticker normalisation, unsupported fund rejection |
-| `InvestmentProjectionServiceTest` | CAPM formula and future value calculation |
+| `MutualFundControllerWebTest` | Real HTTP requests: missing parameter (400), years over 50 (400), negative amount (400), unknown page (404) |
+| `InvestmentProjectionServiceTest` | CAPM formula, future value, beta safety check (fallback to 1.0 and range boundaries) |
 | `InvestmentProjectionServiceExtendedTest` | Edge cases: time horizons, high beta, large amounts, precision |
 | `MutualFundCatalogServiceTest` | Fund catalog, supported tickers, case-insensitive lookup |
 | `RiskFreeRateServiceTest` | Risk-free rate value and consistency |
@@ -316,23 +359,27 @@ mvn test -Dtest="com.gs.techchallenge.service.*"
 | `NewtonAnalyticsClientTest` | Beta JSON parsing for all response shapes, error handling |
 | `HistoricalReturnsClientTest` | Historical return parsing, annualisation formula, error handling |
 
-### Frontend Tests
+### Frontend Tests (27 tests)
+
+Run these from the `frontend` folder. `npx` uses the project's own Angular CLI, so no global install is needed.
 
 ```bash
-# Run all tests (watch mode)
+# Run all tests once in headless Chrome
+npx ng test --watch=false --browsers=ChromeHeadless
+
+# Run in watch mode (re-runs on save)
 npm test
 
-# Run tests once (CI mode)
-ng test --watch=false
-
 # Run with coverage report
-ng test --code-coverage
+npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
 ```
+
+They cover the calculator page (form validation, calculations, gain figures, the beta note), the API service, and the currency pipe.
 
 ### Using Test Script
 
 ```bash
-./test.sh  # Runs both backend and frontend tests
+./test.sh  # Runs backend tests, then frontend tests (needs Maven and Chrome)
 ```
 
 ---
@@ -355,21 +402,24 @@ https://api.newtonanalytics.com/modern-portfolio/?tickers=^GSPC,VFIAX&interval=1
 
 ## 🔒 Error Handling
 
-The application implements comprehensive error handling:
+Every error returns the same JSON shape from `GlobalExceptionHandler`:
 
-| Status | Meaning |
-|--------|---------|
-| 200 | Success |
-| 400 | Invalid request parameters |
-| 500 | Server error or external API failure |
+| Status | When | `error` message |
+|--------|------|-----------------|
+| 200 | Success | — |
+| 400 | Unsupported ticker | `Unsupported mutual fund ticker: XYZ` |
+| 400 | Missing parameter | `Missing required parameter: principal` |
+| 400 | Invalid value (not a number, amount ≤ 0, years outside 1–50) | `Invalid request parameters` |
+| 404 | Unknown URL | `Not found` |
+| 502 | Newton Analytics unreachable or returned bad data | Details of the upstream failure |
+| 500 | Anything unexpected | `Unexpected server error` |
 
 Example error response:
 ```json
 {
-  "timestamp": "2026-02-26T10:30:00",
+  "timestamp": "2026-11-05T16:46:09.170Z",
   "status": 400,
-  "error": "Bad Request",
-  "message": "Unsupported mutual fund ticker: INVALID"
+  "error": "Unsupported mutual fund ticker: FAKE"
 }
 ```
 
@@ -427,11 +477,13 @@ The frontend calls the API at the relative path `/api`. In development, `ng serv
 
 ✅ **User-Friendly Interface**: Clean, responsive design with intuitive controls
 ✅ **Real-time Calculations**: Live data from Newton Analytics API
-✅ **Comprehensive Results**: Detailed breakdown of all calculation components
+✅ **Data Quality Check**: Unrealistic betas from the data provider are detected, replaced with 1.0, and flagged on the page
+✅ **Comprehensive Results**: Growth charts, yearly breakdown, and every CAPM input shown
 ✅ **Responsive Design**: Works on desktop, tablet, and mobile devices
-✅ **Error Handling**: Comprehensive error messages and validation
-✅ **Fully Tested**: >80% code coverage on backend, >75% on frontend
-✅ **Well Documented**: Extensive README, development guide, and troubleshooting docs
+✅ **Error Handling**: Clear 400/404/502 responses with consistent JSON
+✅ **Tested**: 61 backend tests and 27 frontend tests
+✅ **Deployed**: Runs on Render as a single Docker container
+✅ **Well Documented**: Extensive README, API reference, development guide, and troubleshooting docs
 
 ---
 
@@ -474,6 +526,35 @@ Upon completing this project, you will understand:
 
 ---
 
+## 📝 Changelog
+
+### 1.1.0 (November 2026)
+
+**Upgrades**
+- Backend moved from Java 17 to **Java 25 LTS**, and Spring Boot from 3.3.8 to **3.5.16**
+- Docker images updated to Java 25 (Eclipse Temurin); Maven 3.9+ now required
+
+**Deployment**
+- Site and API now ship as **one Docker container** (`Dockerfile`), so they share a single URL
+- Added Render deployment settings (`render.yaml`); every push to `main` redeploys
+- The server port can be set with the `PORT` environment variable (default 8080)
+
+**New**
+- **Beta safety check**: unrealistic betas from Newton Analytics are replaced with the market beta of 1.0. The API returns `providerBeta` and `betaAdjusted`, and the results page shows a note.
+
+**Fixes**
+- Total Gain, gain %, and Principal on the results page used the amount typed in the box instead of the amount that was calculated, so editing the amount after calculating showed wrong numbers
+- A missing request parameter returned 500; it now returns 400 with the parameter name
+- An unknown URL returned 500; it now returns 404
+- `years` above 50 was accepted by the API (only the form blocked it); it now returns 400
+- 3 failing frontend tests fixed (mistakes in the test code)
+- `test.sh` runs frontend tests with `npx` in headless Chrome, so a global Angular CLI isn't needed
+
+**Tests**
+- Backend: 45 → 61 tests. Frontend: 24 → 27 tests. All pass.
+
+---
+
 ## 📄 License
 
 This project is part of the GS Tech Challenge curriculum.
@@ -489,5 +570,5 @@ This project is part of the GS Tech Challenge curriculum.
 
 ---
 
-**Last Updated**: November 4, 2026
-**Version**: 1.0.0
+**Last Updated**: November 5, 2026
+**Version**: 1.1.0

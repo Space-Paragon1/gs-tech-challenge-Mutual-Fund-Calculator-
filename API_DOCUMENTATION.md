@@ -186,17 +186,19 @@ this.getProjection('VFIAX', 10000, 5).subscribe(
 
 **Content-Type:** `application/json`
 
-**Body:**
+**Body** (a real response for `years=10`, where the provider's beta was replaced):
 ```json
 {
   "ticker": "VFIAX",
   "principal": 10000,
-  "years": 5,
+  "years": 10,
   "riskFreeRate": 0.0425,
-  "beta": 0.95,
-  "expectedReturnRate": 0.10,
-  "capmRate": 0.1103,
-  "futureValue": 16879.57
+  "beta": 1.0,
+  "providerBeta": -0.0958,
+  "betaAdjusted": true,
+  "expectedReturnRate": 0.11997,
+  "capmRate": 0.11997,
+  "futureValue": 31050.19
 }
 ```
 
@@ -208,10 +210,16 @@ this.getProjection('VFIAX', 10000, 5).subscribe(
 | `principal` | number | The initial investment amount |
 | `years` | integer | The investment duration |
 | `riskFreeRate` | number | US Treasury 10-year rate (4.25%) |
-| `beta` | number | Fund's volatility relative to S&P 500 |
+| `beta` | number | Beta used in the calculation |
+| `providerBeta` | number | Beta returned by Newton Analytics |
+| `betaAdjusted` | boolean | `true` if `providerBeta` was unrealistic and the market beta 1.0 was used instead |
 | `expectedReturnRate` | number | 5-year S&P 500 average annual return |
 | `capmRate` | number | Calculated expected annual return (CAPM) |
 | `futureValue` | number | Projected value after specified years |
+
+### Beta Safety Check
+
+All funds in the catalog are diversified US stock funds, so their beta against the S&P 500 should be close to 1. If Newton Analytics returns a beta below 0.5, above 2.0, or not a number, the API uses 1.0 instead, sets `betaAdjusted` to `true`, and keeps the original value in `providerBeta`. Betas inside the range are used as-is.
 
 ### Calculation Example
 
@@ -223,7 +231,7 @@ Input:
 
 API Retrieves:
   riskFreeRate = 0.0425 (4.25%)
-  beta = 0.95 (from Newton Analytics)
+  beta = 0.95 (from Newton Analytics; inside 0.5–2.0, so used as-is)
   expectedReturnRate = 0.10 (10% from Newton Analytics)
 
 Calculation:
@@ -233,11 +241,11 @@ Calculation:
            = 0.097125 (9.7125%)
 
   futureValue = 10,000 × (1 + 0.097125)^5
-              = 10,000 × 1.6088
-              = $16,088.00
+              = 10,000 × 1.58957
+              = $15,895.73
 
 Output:
-  futureValue = $16,088.00
+  futureValue = $15,895.73
 ```
 
 ### Status Codes
@@ -245,52 +253,48 @@ Output:
 | Code | Meaning | Example |
 |------|---------|---------|
 | 200 | Successfully calculated | Projection returned |
-| 400 | Bad Request | Invalid ticker, principal, or years |
-| 500 | Server Error | External API failure |
+| 400 | Bad Request | Unsupported ticker, missing parameter, principal ≤ 0, years outside 1–50 |
+| 404 | Not Found | Unknown URL |
+| 502 | Bad Gateway | Newton Analytics unreachable or returned unusable data |
+| 500 | Server Error | Anything unexpected |
 
 ### Error Examples
 
-**Invalid Ticker:**
+All errors share one JSON shape: `timestamp`, `status`, and an `error` message.
+
+**Unsupported Ticker:**
 ```json
 {
-  "timestamp": "2026-02-26T10:30:00.000+00:00",
+  "timestamp": "2026-11-05T16:46:09.170Z",
   "status": 400,
-  "error": "Bad Request",
-  "message": "Unsupported mutual fund ticker: INVALID",
-  "path": "/api/investments/future-value"
+  "error": "Unsupported mutual fund ticker: INVALID"
 }
 ```
 
-**Missing Parameters:**
+**Missing Parameter:**
 ```json
 {
-  "timestamp": "2026-02-26T10:30:00.000+00:00",
+  "timestamp": "2026-11-05T16:46:09.101Z",
   "status": 400,
-  "error": "Bad Request",
-  "message": "Required request parameter 'principal' for method parameter type BigDecimal is not present",
-  "path": "/api/investments/future-value"
+  "error": "Missing required parameter: principal"
 }
 ```
 
-**Invalid Principal:**
+**Invalid Value** (principal ≤ 0, years outside 1–50, or not a number):
 ```json
 {
-  "timestamp": "2026-02-26T10:30:00.000+00:00",
+  "timestamp": "2026-11-05T16:46:09.159Z",
   "status": 400,
-  "error": "Bad Request",
-  "message": "must be greater than 0",
-  "path": "/api/investments/future-value"
+  "error": "Invalid request parameters"
 }
 ```
 
 **External API Failure:**
 ```json
 {
-  "timestamp": "2026-02-26T10:30:00.000+00:00",
-  "status": 500,
-  "error": "Internal Server Error",
-  "message": "Unable to fetch beta from Newton Analytics",
-  "path": "/api/investments/future-value"
+  "timestamp": "2026-11-05T16:46:09.200Z",
+  "status": 502,
+  "error": "Unable to fetch beta from Newton Analytics"
 }
 ```
 

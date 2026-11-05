@@ -20,7 +20,7 @@ echo "✅ Backend tests passed"
 echo ""
 echo "Running frontend tests..."
 cd frontend
-ng test --watch=false
+npx ng test --watch=false --browsers=ChromeHeadless
 
 if [ $? -ne 0 ]; then
     echo "❌ Frontend tests failed"
