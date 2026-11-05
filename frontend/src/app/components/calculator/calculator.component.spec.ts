@@ -23,6 +23,8 @@ describe('CalculatorComponent', () => {
     years: 5,
     riskFreeRate: 0.04,
     beta: 1.2,
+    providerBeta: 1.2,
+    betaAdjusted: false,
     expectedReturnRate: 0.10,
     capmRate: 0.112,
     futureValue: 17005.84
@@ -212,6 +214,34 @@ describe('CalculatorComponent', () => {
     expect(component.totalGain).toBeCloseTo(mockProjection.futureValue - mockProjection.principal, 2);
     expect(component.gainPercentage).toBeCloseTo(
       ((mockProjection.futureValue - mockProjection.principal) / mockProjection.principal) * 100, 2);
+  });
+
+  it('should not show the beta note when the provider beta was used', () => {
+    mutualFundService.getMutualFunds.and.returnValue(of(mockFunds));
+    mutualFundService.getInvestmentProjection.and.returnValue(of(mockProjection));
+
+    fixture.detectChanges();
+    component.investmentForm.patchValue({ ticker: 'VFIAX', principal: 10000, years: 5 });
+    component.calculateProjection();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.beta-note')).toBeNull();
+  });
+
+  it('should show the beta note when the provider beta was replaced', () => {
+    const adjustedProjection = { ...mockProjection, beta: 1.0, providerBeta: -0.0875, betaAdjusted: true };
+    mutualFundService.getMutualFunds.and.returnValue(of(mockFunds));
+    mutualFundService.getInvestmentProjection.and.returnValue(of(adjustedProjection));
+
+    fixture.detectChanges();
+    component.investmentForm.patchValue({ ticker: 'VFIAX', principal: 10000, years: 5 });
+    component.calculateProjection();
+    fixture.detectChanges();
+
+    const note: HTMLElement | null = fixture.nativeElement.querySelector('.beta-note');
+    expect(note).not.toBeNull();
+    expect(note!.textContent).toContain('-0.0875');
+    expect(note!.textContent).toContain('market beta of 1.0');
   });
 
   it('should disable form during loading', () => {

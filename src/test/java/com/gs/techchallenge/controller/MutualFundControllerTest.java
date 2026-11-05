@@ -52,6 +52,8 @@ class MutualFundControllerTest {
                 5,
                 0.04,
                 1.2,
+                1.2,
+                false,
                 0.10,
                 0.112,
                 BigDecimal.valueOf(17002.94)
@@ -93,6 +95,8 @@ class MutualFundControllerTest {
                 3,
                 0.04,
                 1.0,
+                1.0,
+                false,
                 0.08,
                 0.08,
                 BigDecimal.valueOf(6298.56)

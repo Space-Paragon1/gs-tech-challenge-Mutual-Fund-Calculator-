@@ -135,7 +135,7 @@
           <span class="param-value">{{ (projection.riskFreeRate * 100) | number: '1.2-2' }}%</span>
         </div>
         <div class="param">
-          <span class="param-label">Beta (β)</span>
+          <span class="param-label">Beta (β) <span *ngIf="projection.betaAdjusted" class="param-tag">adjusted</span></span>
           <span class="param-value">{{ projection.beta | number: '1.4-4' }}</span>
         </div>
         <div class="param">
@@ -143,6 +143,14 @@
           <span class="param-value">{{ (projection.expectedReturnRate * 100) | number: '1.2-2' }}%</span>
         </div>
       </div>
+
+      <p *ngIf="projection.betaAdjusted" class="beta-note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>
+          The data provider returned a beta of {{ projection.providerBeta | number: '1.4-4' }} for {{ projection.ticker }},
+          which isn't realistic for a diversified stock fund. The market beta of 1.0 was used instead.
+        </span>
+      </p>
 
       <div class="formula-bar">
         <code>r = R<sub>f</sub> + β × (R<sub>m</sub> − R<sub>f</sub>) = {{ (projection.riskFreeRate * 100) | number: '1.2-2' }}% + {{ projection.beta | number: '1.2-2' }} × ({{ (projection.expectedReturnRate * 100) | number: '1.2-2' }}% − {{ (projection.riskFreeRate * 100) | number: '1.2-2' }}%) = {{ annualizedReturn | number: '1.2-2' }}%</code>

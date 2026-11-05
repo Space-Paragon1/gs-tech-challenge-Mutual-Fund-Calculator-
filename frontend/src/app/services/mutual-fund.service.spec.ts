@@ -47,6 +47,8 @@ describe('MutualFundService', () => {
       years: 5,
       riskFreeRate: 0.04,
       beta: 1.2,
+      providerBeta: 1.2,
+      betaAdjusted: false,
       expectedReturnRate: 0.10,
       capmRate: 0.112,
       futureValue: 17005.84
