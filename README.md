@@ -2,6 +2,10 @@
 
 A comprehensive full-stack web application designed to help users estimate potential returns on their mutual fund investments using advanced financial analytics and the Capital Asset Pricing Model (CAPM).
 
+**🔗 Live demo: [gs-mutual-fund-calculator.onrender.com](https://gs-mutual-fund-calculator.onrender.com)**
+
+> Hosted on Render's free plan: if nobody has visited in the last 15 minutes, the first load takes about a minute while the server wakes up.
+
 ## 🎯 Project Overview
 
 This application enables users to:
@@ -249,7 +253,10 @@ gs-tech-challenge/
 
 ## 🔌 REST API Endpoints
 
-### Base URL: `http://localhost:8080/api`
+### Base URL
+
+- Live: `https://gs-mutual-fund-calculator.onrender.com/api`
+- Local: `http://localhost:8080/api`
 
 #### 1. Get All Mutual Funds
 
@@ -427,7 +434,7 @@ Example error response:
 
 ## ☁️ Deployment
 
-The app is deployed on [Render](https://render.com) as a single Docker service:
+The app is live at **https://gs-mutual-fund-calculator.onrender.com**, deployed on [Render](https://render.com) as a single Docker service:
 
 - The root `Dockerfile` builds the Angular site, bundles it into the Spring Boot jar, and runs it. The website and the API share one URL, so no CORS setup is needed.
 - `render.yaml` holds the Render settings (free plan, health check on `/api/mutual-funds`).
@@ -535,6 +542,7 @@ Upon completing this project, you will understand:
 - Docker images updated to Java 25 (Eclipse Temurin); Maven 3.9+ now required
 
 **Deployment**
+- **Live at https://gs-mutual-fund-calculator.onrender.com**
 - Site and API now ship as **one Docker container** (`Dockerfile`), so they share a single URL
 - Added Render deployment settings (`render.yaml`); every push to `main` redeploys
 - The server port can be set with the `PORT` environment variable (default 8080)

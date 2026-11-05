@@ -3,8 +3,11 @@
 ## Base URL
 
 ```
-http://localhost:8080/api
+https://gs-mutual-fund-calculator.onrender.com/api   (live)
+http://localhost:8080/api                             (local)
 ```
+
+The examples below use the local URL. Swap in the live one to try them against the deployed app.
 
 ## Endpoints Overview
 
